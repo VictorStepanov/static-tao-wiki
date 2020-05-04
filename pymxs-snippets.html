@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Pymxs helpful snippets - TAO-Wiki</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link rel="canonical" href="/pymxs-snippets.html">
+
+        <meta name="author" content="TAO-community" />
+        <meta name="description" content="Selection Sets: Getting Named Selection Sets is a fairly straightforward procedure for Object Selection Sets, but it&#39;s a bit more &#34;difficult&#34; to find how to do it for object mode ones (Vert/Edge/Faces etc), so to save the hassle Getting SelSets From object modes (verts/edges/poly/etc) This …" />
+
+        <meta property="og:site_name" content="TAO-Wiki" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Pymxs helpful snippets"/>
+        <meta property="og:url" content="/pymxs-snippets.html"/>
+        <meta property="og:description" content="Selection Sets: Getting Named Selection Sets is a fairly straightforward procedure for Object Selection Sets, but it&#39;s a bit more &#34;difficult&#34; to find how to do it for object mode ones (Vert/Edge/Faces etc), so to save the hassle Getting SelSets From object modes (verts/edges/poly/etc) This …"/>
+        <meta property="article:published_time" content="2020-01-01" />
+            <meta property="article:section" content="wiki" />
+            <meta property="article:author" content="TAO-community" />
+
+
+    <!-- Bootstrap -->
+        <link href="/theme/css/themes/tao/bootstrap.min.css" rel="stylesheet">
+
+    <link href="/theme/css/entypo.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/native.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+
+
+
+
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-light bg-faded fixed-top" role="navigation">
+    <button type="button" class="navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target=".navbar-main-collapse" aria-label="Toggle navigation">
+        <i class="icon-menu"></i>
+    </button>
+    <a href="/" class="navbar-brand">
+TAO-Wiki    </a>
+    <div class="collapse navbar-collapse navbar-main-collapse">
+        <ul class="navbar-nav">
+                     <li class="nav-item "><a href="/pages/under_construction.html" class="nav-link">
+                         Page Under Construction....
+                      </a></li>
+                    <li class="nav-item ">
+                        <a href="/category/misc.html" class="nav-link">Misc</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a href="/category/post.html" class="nav-link">Post</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="/category/wiki.html" class="nav-link">Wiki</a>
+                    </li>
+        </ul>
+        <ul class="navbar-nav navbar-right">
+        </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+</nav> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-9">
+    <section id="content">
+        <article>
+            <header>
+                <h1>
+                    <a href="/pymxs-snippets.html"
+                       rel="bookmark"
+                       title="Permalink to Pymxs helpful snippets">
+                        Pymxs helpful snippets
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <h1>Selection Sets:</h1>
+<p>Getting Named Selection Sets is a fairly straightforward procedure for Object Selection Sets, but it's a bit more "difficult" to find how to do it for object mode ones (Vert/Edge/Faces etc), so to save the hassle
+<strong>Getting SelSets From object modes (verts/edges/poly/etc)</strong>
+This is the "same" just change whatever mode you're looking for
+* Get Selection Set names from Faces Sets:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pymxs</span>
+<span class="n">rt</span> <span class="o">=</span> <span class="n">pymxs</span><span class="o">.</span><span class="n">runtime</span>
+<span class="n">thing</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">getCurrentSelection</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">thing</span><span class="o">.</span><span class="n">Faces</span><span class="o">.</span><span class="n">selSetNames</span><span class="p">)</span>
+<span class="c1">#(&quot;TestSet&quot;, &quot;TestSet2&quot;) # example output</span>
+</code></pre></div>
+
+
+<p>Obviously then you can select a set by doing something like:</p>
+<div class="highlight"><pre><span></span><code><span class="err">thing.selectedFaces = thing.Faces[&quot;TestSet2&quot;]</span>
+</code></pre></div>
+
+
+<h1>Get All Materials</h1>
+<p>Does a check to see if you have multi material on your model, if it does, iterates and tries to do a face select to check if the material is actually on the model and returns a list of material ID's and what faces have it. 
+```def get_all_mats(model):
+    materials = []
+    dupe = rt.copy(model)
+    rt.resetXForm(dupe)
+    rt.collapseStack(dupe)
+    material = dupe.material
+    if rt.classOf(material) == rt.Multimaterial:
+        for matID in xrange(material.numsubs):
+            #see if we can select any faces for each material
+            dupe.selectByMaterial(matID+1)
+            faces = dupe.GetSelection(rt.name("Face"))
+            numSelected = faces.numberset
+            if numSelected &gt; 0:
+                materials.append({material[matID]: numSelected})
+    elif rt.classOf(material) == rt.StandardMaterial:
+        # if we only have one material we assume that it is on every face
+        materials.append({material.name: dupe.mesh.numFaces})
+    rt.delete(dupe)
+    return materials</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># EZ Multi Import</span>
+<span class="n">Very</span> <span class="n">small</span> <span class="n">multi</span> <span class="nb">file</span> <span class="n">importer</span> <span class="n">script</span><span class="o">.</span> <span class="n">Drives</span> <span class="n">me</span> <span class="n">nuts</span> <span class="n">having</span> <span class="n">to</span> <span class="kn">import</span> <span class="nn">multiple</span> <span class="nn">fbx</span><span class="s1">&#39;s etc.</span>
+<span class="sb">``</span><span class="err">`</span><span class="kn">from</span> <span class="nn">PySide2</span> <span class="kn">import</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">pymxs</span>
+<span class="n">rt</span> <span class="o">=</span> <span class="n">pymxs</span><span class="o">.</span><span class="n">runtime</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">()</span>
+
+    <span class="n">files</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">getOpenFileNames</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;Multi Importer&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;FBX (*.fbx);; OBJ (*.obj);; All Files (*.*)&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">rt</span><span class="o">.</span><span class="n">importFile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">rt</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;noPrompt&quot;</span><span class="p">))</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div>
+
+
+<h1>Get all Children + define specific type of child to get</h1>
+<p>Provide a node as a parent to search down from and optionally give a node type in Max to search for such as Lights, Geometry, FFD's etc. Get back a list of the children </p>
+<div class="highlight"><pre><span></span><code><span class="n">def</span> <span class="n">get_all_children</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">node_type</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="ss">&quot;&quot;&quot;Handy function to get all the children of a given node</span>
+
+<span class="ss">    Args:</span>
+<span class="ss">        parent (3dsmax Node1): node to get all children of</span>
+<span class="ss">        node_type (None, runtime.class): give class to check for</span>
+<span class="ss">                                         e.g. rt.FFDBox/rt.GeometryClass etc.</span>
+
+<span class="ss">    Returns:</span>
+<span class="ss">        list: list of all children of the parent node</span>
+<span class="ss">    &quot;&quot;&quot;</span>
+    <span class="n">def</span> <span class="n">list_children</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="k">c</span> <span class="k">in</span> <span class="n">node</span><span class="p">.</span><span class="n">Children</span><span class="p">:</span>
+            <span class="n">children</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="k">c</span><span class="p">)</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="n">children</span> <span class="o">+</span> <span class="n">list_children</span><span class="p">(</span><span class="k">c</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">children</span>
+    <span class="n">child_list</span> <span class="o">=</span> <span class="n">list_children</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="k">in</span> <span class="n">child_list</span> <span class="k">if</span> <span class="n">rt</span><span class="p">.</span><span class="n">superClassOf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">node_type</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">node_type</span> <span class="k">else</span> <span class="n">child_list</span><span class="p">)</span>
+</code></pre></div>
+
+
+<h1>Is Ancestor</h1>
+<p>Check back up the tree from a node to see if a given named node is an ancestor</p>
+<div class="highlight"><pre><span></span><code><span class="n">def</span> <span class="n">is_ancestor</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="ss">&quot;&quot;&quot;Given the node, is there an ancestor named &quot;</span><span class="n">name</span><span class="ss">&quot;</span>
+
+<span class="ss">    Args:</span>
+<span class="ss">        node (max Node): node to check for an ancestor on</span>
+<span class="ss">        name (string): name of the ancestor to check for</span>
+
+<span class="ss">    Returns:</span>
+<span class="ss">        bool: True if the node is an ancestor</span>
+<span class="ss">    &quot;&quot;&quot;</span>
+    <span class="k">found</span> <span class="o">=</span> <span class="k">False</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="k">False</span>
+    <span class="n">curr_ancestor</span> <span class="o">=</span> <span class="n">node</span><span class="p">.</span><span class="n">parent</span>
+    <span class="k">if</span> <span class="n">curr_ancestor</span><span class="p">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">True</span>
+
+    <span class="n">while</span> <span class="n">curr_ancestor</span><span class="p">.</span><span class="n">parent</span> <span class="k">is</span> <span class="k">not</span> <span class="k">None</span><span class="p">:</span>
+        <span class="n">curr_ancestor</span> <span class="o">=</span> <span class="n">curr_ancestor</span><span class="p">.</span><span class="n">parent</span>
+        <span class="k">if</span> <span class="n">curr_ancestor</span><span class="p">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">True</span>
+    <span class="k">return</span> <span class="k">False</span>
+</code></pre></div>
+            </div>
+            <!-- /.entry-content -->
+        </article>
+    </section>
+
+        </div>
+        <div class="col-md-3" id="sidebar">
+            <aside>
+<!-- Sidebar -->
+<section class="card">
+  <ul class="list-group list-group-flush">
+
+<!-- Sidebar/Social -->
+<li class="list-group-item">
+  <h4><i class="icon-home"></i><span class="icon-label">Social</span></h4>
+  <ul class="list-group" id="social">
+    <li class="list-group-item"><a href="https://tech-artists.slack.com"><i class="icon-tech-artists-slack"></i> Tech-Artists Slack</a></li>
+  </ul>
+</li>
+<!-- End Sidebar/Social -->
+
+<!-- Sidebar/Links -->
+<li class="list-group-item">
+  <h4><i class="icon-external-link-square"></i><span class="icon-label">Links</span></h4>
+  <ul class="list-group" id="links">
+    <li class="list-group-item">
+      <a href="http://discourse.techart.online" target="_blank">Tech-Artists.Org</a>
+    </li>
+  </ul>
+</li>
+<!-- End Sidebar/Links -->
+  </ul>
+</section>
+<!-- End Sidebar -->            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-sm-10">&copy; 2020 TAO-community
+            &middot; Powered by <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>         </div>
+         <div class="col-sm-2"><p class="float-right"><i class="icon-up-big"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+
+
+</body>
+</html>
